@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>江南</title>
+  <subtitle>活到老学到老</subtitle>
+  <link href="/atom.xml" rel="self"/>
+  
+  <link href="http://blog.unigamestudio.com/"/>
+  <updated>2016-12-15T13:36:48.000Z</updated>
+  <id>http://blog.unigamestudio.com/</id>
+  
+  <author>
+    <name>江南</name>
+    
+  </author>
+  
+  <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>unity3d前端优化相关</title>
+    <link href="http://blog.unigamestudio.com/2016/09/18/unity3d%E5%89%8D%E7%AB%AF%E4%BC%98%E5%8C%96%E7%9B%B8%E5%85%B3/"/>
+    <id>http://blog.unigamestudio.com/2016/09/18/unity3d前端优化相关/</id>
+    <published>2016-09-18T12:42:47.000Z</published>
+    <updated>2016-12-15T13:36:48.000Z</updated>
+    
+    <content type="html"><![CDATA[<ol>
+<li>不要使用foreach。原因：目前5.3.X版本，仍然存在GC（foreach只在某些特定新情况下没有GC，所以为了统一，不使用）<br>代替方案：<ol>
+<li>List=&gt;<br> <code>for (int i = 0; i &lt; list.Count; ++i)</code></li>
+<li>数据=&gt;<br> <code>for (int i = 0; i &lt; arr.Length; ++i)</code></li>
+<li>字典=&gt;<br> <code>var iter = dict.GetEnumerator();
+ while (iter.MoveNext())
+ {
+ }
+ iter.Dispose();</code></li>
+</ol>
+</li>
+<li><p>不要使用Linq表达式。某些方法里使用LINQ实际内部还是使用foreach,会产生GC</p>
+</li>
+<li><p>尽量减少使用协程。在目前5.3.x里，仍然会产生GC。</p>
+</li>
+<li><p>不要在Update反复new堆对象。如果必须在Update里NEW，并经常使用，请使用对象池ObjectPool<t>。</t></p>
+</li>
+<li><p>struct做为Dictionary的Key的时候，要去实现IEquatable<t>接口，不然每次Contains都会产生GC。</t></p>
+</li>
+<li><p>减少字符串拼接，最好是不拼接。当然有些时候没有办法必须要拼接，请减少 + 号使用，多次拼接，请<br>使用string.Format,如果更大量，请使用System.Text.StringBuilder。不能避免产生GC，请减少GC量。</p>
+</li>
+<li><p>临时变量减少堆对象使用，能采用栈对象就用栈对象。</p>
+</li>
+<li><p>客户端美术导入统一导入png格式（如有合图也采用png格式）。在设置纹理属性请选择TextureType为Advanced</p>
+</li>
+<li><p>我们为2D游戏，所以我们所有纹理不使用Mipmap，并关闭 Read/Write(会导致2倍内存)</p>
+</li>
+<li><p>美术一些MESH的导入，请也关闭Read/Write选项。</p>
+</li>
+<li><p>UI界面的ALTAS合图图片，在用NGUI ATLAS工具合并的时候请选择 Alpha分离。统一采用纹理压缩方式。</p>
+</li>
+<li><p>图片尽量使用纹理压缩，在选择纹理压缩的时候，请手动选择每个平台的压缩格式，因为有时候我们PNG带ALPHA，但实际我们并不需要，<br>所以还是我们手动选择压缩格式。</p>
+</li>
+<li><p>纹理压缩需要宽和高为2的N次倍。最好美术给图的时候，给2的倍数。或者使用Non Power of 2选项，但会导致一定程度拉伸。</p>
+</li>
+<li><p>纹理压缩格式选择：WIN使用DXT1，IOS使用RGB PVR，安卓使用ETC1.</p>
+</li>
+<li><p>如果纹理压缩效果不好，请考虑使用16位色，如果效果不行，慎用32位色。<br>（快速看效果可以使用PVRTOOLS）</p>
+</li>
+<li><p>纹理大小不要大于2048（必须必）。</p>
+</li>
+<li><p>地图纹理，不管ALPHA和RGB图全部采用纹理压缩。并纹理Wrap Mode为Clamp</p>
+</li>
+<li><p>图片尽量不要有多余ALPHA为0的区域。这样生成纹理内存只会变多。</p>
+</li>
+<li><p>拼UI的时候，尽量规划好Depth的范围，例如：多少Depth到多少Depth,为某个使用Altas的范围。<br>尽量减少不同Altas或者文字和Altas之间的Depth交替，减少UI的Draw Call。</p>
+</li>
+<li><p>UI动画尽量使用NGUI的动画，并在一个Atlas里。</p>
+</li>
+<li><p>很重要并常用的UI在关闭时，可以考虑移除摄影机范围。常用但不重要的UI在关闭时，<br>可以使用SetActive(false)</p>
+</li>
+<li><p>UI界面制作时，尽量动静分离，归类，一部分动（带动画的）的放在一个UIPanel里，<br>减少NGUI重建缓存。</p>
+</li>
+<li><p>避免C#装箱拆箱操作.</p>
+</li>
+</ol>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;ol&gt;
+&lt;li&gt;不要使用foreach。原因：目前5.3.X版本，仍然存在GC（foreach只在某些特定新情况下没有GC，所以为了统一，不使用）&lt;br&gt;代替方案：&lt;ol&gt;
+&lt;li&gt;List=&amp;gt;&lt;br&gt; &lt;code&gt;for (int i = 0; i &amp;lt; list.
+    
+    </summary>
+    
+      <category term="unity3d" scheme="http://blog.unigamestudio.com/categories/unity3d/"/>
+    
+      <category term="前端" scheme="http://blog.unigamestudio.com/categories/unity3d/%E5%89%8D%E7%AB%AF/"/>
+    
+      <category term="优化" scheme="http://blog.unigamestudio.com/categories/unity3d/%E5%89%8D%E7%AB%AF/%E4%BC%98%E5%8C%96/"/>
+    
+    
+      <category term="unity3d" scheme="http://blog.unigamestudio.com/tags/unity3d/"/>
+    
+      <category term="前端" scheme="http://blog.unigamestudio.com/tags/%E5%89%8D%E7%AB%AF/"/>
+    
+      <category term="优化" scheme="http://blog.unigamestudio.com/tags/%E4%BC%98%E5%8C%96/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>FairyGUI 相关注意点</title>
+    <link href="http://blog.unigamestudio.com/2016/09/13/FairyGUI/"/>
+    <id>http://blog.unigamestudio.com/2016/09/13/FairyGUI/</id>
+    <published>2016-09-13T13:36:29.000Z</published>
+    <updated>2016-12-15T13:36:52.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>FairyGUI 相关注意点</p>
+<ul>
+<li>元件子物体改过位置以后需要手动调用 <code>xxx.InvalidateBatchingState();</code></li>
+</ul>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;FairyGUI 相关注意点&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;元件子物体改过位置以后需要手动调用 &lt;code&gt;xxx.InvalidateBatchingState();&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+    
+    </summary>
+    
+      <category term="unity3d" scheme="http://blog.unigamestudio.com/categories/unity3d/"/>
+    
+      <category term="FairyGUI" scheme="http://blog.unigamestudio.com/categories/unity3d/FairyGUI/"/>
+    
+    
+      <category term="FairyGUI" scheme="http://blog.unigamestudio.com/tags/FairyGUI/"/>
+    
+      <category term="unity3d" scheme="http://blog.unigamestudio.com/tags/unity3d/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>UnityEngine.UI.dll相关问题解决</title>
+    <link href="http://blog.unigamestudio.com/2016/09/06/UnityEngine-UI-dll%E7%9B%B8%E5%85%B3%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3/"/>
+    <id>http://blog.unigamestudio.com/2016/09/06/UnityEngine-UI-dll相关问题解决/</id>
+    <published>2016-09-06T10:34:49.000Z</published>
+    <updated>2016-12-15T13:36:50.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>UnityEngine.UI.dll is in timestamps but is not known in assetdatabase</p>
+<p>遇到此类xxx.dll的问题，解决方案为</p>
+<ol>
+<li>找到unity编辑器目录下对应的dll文件，通常选择dll文件所在文件夹</li>
+<li>讲文件夹剪切到桌面，打开任意unity工程，关闭unity</li>
+<li>讲文件夹从桌面剪切回 1 所在位置，重新打开unity即可</li>
+</ol>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;UnityEngine.UI.dll is in timestamps but is not known in assetdatabase&lt;/p&gt;
+&lt;p&gt;遇到此类xxx.dll的问题，解决方案为&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;找到unity编辑器目录下对应的dll文件，通常选择
+    
+    </summary>
+    
+      <category term="unity3d" scheme="http://blog.unigamestudio.com/categories/unity3d/"/>
+    
+      <category term="前端" scheme="http://blog.unigamestudio.com/categories/unity3d/%E5%89%8D%E7%AB%AF/"/>
+    
+    
+      <category term="unity3d" scheme="http://blog.unigamestudio.com/tags/unity3d/"/>
+    
+      <category term="前端" scheme="http://blog.unigamestudio.com/tags/%E5%89%8D%E7%AB%AF/"/>
+    
+  </entry>
+  
+</feed>
